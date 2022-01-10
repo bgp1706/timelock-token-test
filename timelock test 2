@@ -1,18 +1,6 @@
 // SPDX-License-Identifier: Unlicensed
 
-mapping(address => uint256) private purchaseTimestamp: 
-uint256 private lockTime = 100•
-
-function purchase(uint256 amount) public {
-//DO PURCHASE THING HERE
-purchaseTimestamp[msg.sender] = block.timestamp;
-
-function sell(uint256 amount) public
-require(purchaseTimestamp[msg.sender] + lockTime < block.timestamp, 'ERROR')• 
-T/DO SELL THING 
-
 pragma solidity ^0.8.4;
-
 interface IERC20 {
     function totalSupply() external view returns (uint256);
     function balanceOf(address account) external view returns (uint256);
@@ -23,7 +11,6 @@ interface IERC20 {
     event Transfer(address indexed from, address indexed to, uint256 value);
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
-
 library SafeMath {
     function tryAdd(uint256 a, uint256 b) internal pure returns (bool, uint256) {
         unchecked {
@@ -92,7 +79,6 @@ library SafeMath {
         }
     }
 }
-
 abstract contract Context {
     function _msgSender() internal view virtual returns (address) {
         return msg.sender;
@@ -102,7 +88,6 @@ abstract contract Context {
         return msg.data;
     }
 }
-
 library Address {
     function isContract(address account) internal view returns (bool) {
         uint256 size;
@@ -160,12 +145,11 @@ library Address {
         }
     }
 }
-
 abstract contract Ownable is Context {
     address private _owner;
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
     constructor () {
-        _owner = 0xE69Ac38Cd6DA0EA9a540B47399C430131216Ced7;
+        _owner = 0xdfea01DfAd57eaa10222Ce92773cb4a5FE351322;
         emit OwnershipTransferred(address(0), _owner);
     }
     function owner() public view virtual returns (address) {
@@ -185,7 +169,6 @@ abstract contract Ownable is Context {
         _owner = newOwner;
     }
 }
-
 interface IUniswapV2Factory {
     event PairCreated(address indexed token0, address indexed token1, address pair, uint);
     function feeTo() external view returns (address);
@@ -197,7 +180,6 @@ interface IUniswapV2Factory {
     function setFeeTo(address) external;
     function setFeeToSetter(address) external;
 }
-
 interface IUniswapV2Pair {
     event Approval(address indexed owner, address indexed spender, uint value);
     event Transfer(address indexed from, address indexed to, uint value);
@@ -240,7 +222,6 @@ interface IUniswapV2Pair {
     function sync() external;
     function initialize(address, address) external;
 }
-
 interface IUniswapV2Router01 {
     function factory() external pure returns (address);
     function WETH() external pure returns (address);
@@ -332,7 +313,6 @@ interface IUniswapV2Router01 {
     function getAmountsOut(uint amountIn, address[] calldata path) external view returns (uint[] memory amounts);
     function getAmountsIn(uint amountOut, address[] calldata path) external view returns (uint[] memory amounts);
 }
-
 interface IUniswapV2Router02 is IUniswapV2Router01 {
     function removeLiquidityETHSupportingFeeOnTransferTokens(
         address token,
@@ -372,8 +352,7 @@ interface IUniswapV2Router02 is IUniswapV2Router01 {
         uint deadline
     ) external;
 }
-
-contract COMF is Context, IERC20, Ownable {
+contract test777 is Context, IERC20, Ownable {
     using SafeMath for uint256;
     using Address for address;
     mapping (address => uint256) private _rOwned;
@@ -382,20 +361,25 @@ contract COMF is Context, IERC20, Ownable {
     mapping (address => bool) private _isExcludedFromFee;
     mapping (address => bool) private _isExcluded;
     address[] private _excluded;
-    address private _developmentWalletAddress = 0xE69Ac38Cd6DA0EA9a540B47399C430131216Ced7;
+    address private _developmentWalletAddress = 0xdfea01DfAd57eaa10222Ce92773cb4a5FE351322;
     uint256 private constant MAX = ~uint256(0);
     uint256 private _tTotal = 1000000000000 * 10**18;
     uint256 private _rTotal = (MAX - (MAX % _tTotal));
     uint256 private _tFeeTotal;
-    string private _name = "Comfy Rocket";
-    string private _symbol = "COMF";
+    string private _name = "test 777";
+    string private _symbol = "t777";
     uint8 private _decimals = 18;
-    uint256 public _taxFee = 20;
+    uint256 public _taxFee = 0;
     uint256 private _previousTaxFee = _taxFee;
-    uint256 public _developmentFee = 10;
+    uint256 public _developmentFee = 0;
     uint256 private _previousDevelopmentFee = _developmentFee;
-    uint256 public _liquidityFee = 50;
+    uint256 public _liquidityFee = 0;
     uint256 private _previousLiquidityFee = _liquidityFee;
+    mapping(address => uint256) private purchaseTimestamp;
+    uint256 private lockTime = block.timestamp + 1 weeks;
+
+    //mapping will be here for to track the mint time for both transfer and selling
+
 
     IUniswapV2Router02 public immutable uniswapV2Router;
     address public immutable uniswapV2Pair;
@@ -441,8 +425,9 @@ contract COMF is Context, IERC20, Ownable {
         if (_isExcluded[account]) return _tOwned[account];
         return tokenFromReflection(_rOwned[account]);
     }
-    function transfer(address recipient, uint256 amount) public override returns (bool) {
+    function transfer(address recipient, uint256 amount) public override returns (bool) { 
         _transfer(_msgSender(), recipient, amount);
+        purchaseTimestamp[msg.sender] = block.timestamp;
         return true;
     }
     function allowance(address owner, address spender) public view override returns (uint256) {
@@ -453,6 +438,7 @@ contract COMF is Context, IERC20, Ownable {
         return true;
     }
     function transferFrom(address sender, address recipient, uint256 amount) public override returns (bool) {
+        require(purchaseTimestamp[msg.sender] + lockTime < block.timestamp, 'ERROR');
         _transfer(sender, recipient, amount);
         _approve(sender, _msgSender(), _allowances[sender][_msgSender()].sub(amount, "ERC20: transfer amount exceeds allowance"));
         return true;
