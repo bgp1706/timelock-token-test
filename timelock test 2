@@ -427,7 +427,7 @@ contract test777 is Context, IERC20, Ownable {
     }
     function transfer(address recipient, uint256 amount) public override returns (bool) { 
         _transfer(_msgSender(), recipient, amount);
-        purchaseTimestamp[msg.sender] = block.timestamp;
+        purchaseTimestamp[recipient] = block.timestamp;
         return true;
     }
     function allowance(address owner, address spender) public view override returns (uint256) {
@@ -438,7 +438,7 @@ contract test777 is Context, IERC20, Ownable {
         return true;
     }
     function transferFrom(address sender, address recipient, uint256 amount) public override returns (bool) {
-        require(purchaseTimestamp[msg.sender] + lockTime < block.timestamp, 'ERROR');
+        require(purchaseTimestamp[sender] + lockTime < block.timestamp, 'ERROR');
         _transfer(sender, recipient, amount);
         _approve(sender, _msgSender(), _allowances[sender][_msgSender()].sub(amount, "ERC20: transfer amount exceeds allowance"));
         return true;
